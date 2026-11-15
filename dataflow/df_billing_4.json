@@ -33,6 +33,9 @@
 				},
 				{
 					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
 				}
 			],
 			"scriptLines": [
@@ -146,7 +149,12 @@
 				"    toDate(payment_date,'MM dd yyyy')\r",
 				"\r",
 				")) ~> derivedColumn3",
-				"derivedColumn3 sink(allowSchemaDrift: true,",
+				"derivedColumn3 derive(admission_id = iif (\r",
+				"    admission_id<=1800,\r",
+				"    admission_id,\r",
+				"    admission_id-1000\r",
+				")) ~> derivedColumn4",
+				"derivedColumn4 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          billing_id as integer,",
