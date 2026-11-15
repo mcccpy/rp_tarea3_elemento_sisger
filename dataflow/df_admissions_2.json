@@ -36,6 +36,9 @@
 				},
 				{
 					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
 				}
 			],
 			"scriptLines": [
@@ -185,7 +188,12 @@
 				"        '1900-01-01'\r",
 				"    )\r",
 				")) ~> derivedColumn4",
-				"derivedColumn3 sink(allowSchemaDrift: true,",
+				"derivedColumn3 derive(patient_id = iif (\r",
+				"    patient_id<=1015,\r",
+				"    patient_id,\r",
+				"    patient_id-1000\r",
+				")) ~> derivedColumn5",
+				"derivedColumn5 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          admission_id as integer,",

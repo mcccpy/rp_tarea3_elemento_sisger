@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "sl_admissions",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
 				}
 			],
@@ -20,11 +24,66 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"source(output(",
+				"          fecha as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT admission_date AS fecha\\nFROM silver.admissions\\nWHERE admission_date IS NOT NULL\\n\\nUNION\\n\\nSELECT discharge_date AS fecha\\nFROM silver.admissions\\nWHERE discharge_date IS NOT NULL\\n\\nUNION\\n\\nSELECT payment_date AS fecha\\nFROM silver.billing\\nWHERE payment_date IS NOT NULL\\n\\nUNION\\n\\nSELECT date_of_birth AS fecha\\nFROM silver.patients\\nWHERE date_of_birth IS NOT NULL',",
+				"     format: 'query') ~> source1",
+				"source1 derive(fecha_key = toInteger(\r",
+				"    toString(year(fecha)) +\r",
+				"    lpad(toString(month(fecha)),2,'0') +\r",
+				"    lpad(toString(dayOfMonth(fecha)),2,'0')\r",
+				"),",
+				"          anio = year(fecha),",
+				"          trimestre = toInteger(ceil(month(fecha)/3.0)),",
+				"          mes = month(fecha)\r",
+				",",
+				"          mes_nombre = case(\r",
+				"    month(fecha) == 1, 'Enero',\r",
+				"    month(fecha) == 2, 'Febrero',\r",
+				"    month(fecha) == 3, 'Marzo',\r",
+				"    month(fecha) == 4, 'Abril',\r",
+				"    month(fecha) == 5, 'Mayo',\r",
+				"    month(fecha) == 6, 'Junio',\r",
+				"    month(fecha) == 7, 'Julio',\r",
+				"    month(fecha) == 8, 'Agosto',\r",
+				"    month(fecha) == 9, 'Septiembre',\r",
+				"    month(fecha) == 10, 'Octubre',\r",
+				"    month(fecha) == 11, 'Noviembre',\r",
+				"    'Diciembre'\r",
+				"),",
+				"          semana_anio = weekOfYear(fecha),",
+				"          dia_mes = dayOfMonth(fecha),",
+				"          dia_semana = iif(\r",
+				"    dayOfWeek(fecha) == 1,\r",
+				"    7,\r",
+				"    dayOfWeek(fecha) - 1\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 derive(trimestre_nombre = 'T'+toString(trimestre),",
+				"          mes_corto = left(mes_nombre,3),",
+				"          dia_nombre = case(\r",
+				"    dia_semana == 1,'Lunes',\r",
+				"    dia_semana == 2,'Martes',\r",
+				"    dia_semana == 3,'Miércoles',\r",
+				"    dia_semana == 4,'Jueves',\r",
+				"    dia_semana == 5,'Viernes',\r",
+				"    dia_semana == 6,'Sábado',\r",
+				"    'Domingo'\r",
+				"),",
+				"          es_fin_de_semana = dia_semana >= 6) ~> derivedColumn2",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          fecha_key as integer,",
@@ -48,7 +107,22 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          fecha_key,",
+				"          fecha_completa = fecha,",
+				"          anio,",
+				"          trimestre,",
+				"          trimestre_nombre,",
+				"          mes,",
+				"          mes_nombre,",
+				"          mes_corto,",
+				"          semana_anio,",
+				"          dia_mes,",
+				"          dia_semana,",
+				"          dia_nombre,",
+				"          es_fin_de_semana",
+				"     )) ~> sink1"
 			]
 		}
 	}

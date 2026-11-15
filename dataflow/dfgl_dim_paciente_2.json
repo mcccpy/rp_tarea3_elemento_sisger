@@ -24,14 +24,17 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          patient_id as integer,",
 				"          full_name as string,",
 				"          gender as string,",
 				"          date_of_birth as date,",
-				"          phone as string,",
 				"          email as string,",
 				"          address as string,",
 				"          insurance_provider as string",
@@ -39,8 +42,18 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"     query: 'SELECT patient_id,\\nfull_name,\\ngender,\\ndate_of_birth,\\nemail,\\naddress,\\ninsurance_provider FROM silver.patients',",
+				"     format: 'query') ~> source1",
+				"source1 derive(birth = case(\r",
+				"    floor(monthsBetween(currentDate(), date_of_birth) / 12) <= 18, '0-18',\r",
+				"    floor(monthsBetween(currentDate(), date_of_birth) / 12) <= 35, '19-35',\r",
+				"    floor(monthsBetween(currentDate(), date_of_birth) / 12) <= 60, '36-60',\r",
+				"    '60+'\r",
+				"),",
+				"          insurance_provider = iif (\r",
+				"    isNull(insurance_provider),'Null',insurance_provider\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          paciente_key as integer,",
@@ -60,7 +73,17 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          patient_id_bk = patient_id,",
+				"          nombre_completo = full_name,",
+				"          genero = gender,",
+				"          fecha_nacimiento = date_of_birth,",
+				"          rango_etario = birth,",
+				"          correo_electronico = email,",
+				"          direccion = address,",
+				"          proveedor_seguro = insurance_provider",
+				"     )) ~> sink1"
 			]
 		}
 	}

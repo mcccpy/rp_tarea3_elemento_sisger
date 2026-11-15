@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "sl_diagnoses",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
 				}
 			],
@@ -20,11 +24,33 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"source(output(",
+				"          icd_code as string,",
+				"          diagnosis_description as string,",
+				"          severity as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT  icd_code , diagnosis_description,severity  FROM silver.diagnoses GROUP BY icd_code , diagnosis_description,severity ',",
+				"     format: 'query') ~> source1",
+				"source1 derive(severity = iif (\r",
+				"    isNull(severity),'NULL',\r",
+				"    severity\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 aggregate(groupBy(icd_code,",
+				"          severity),",
+				"     diagnosis_description = first(diagnosis_description)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          diagnostico_key as integer,",
@@ -39,7 +65,12 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          codigo_icd = icd_code,",
+				"          descripcion_patologia = diagnosis_description,",
+				"          nivel_severidad = severity",
+				"     )) ~> sink1"
 			]
 		}
 	}
