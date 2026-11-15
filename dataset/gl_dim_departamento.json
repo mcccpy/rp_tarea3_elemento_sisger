@@ -12,27 +12,12 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "billing_id",
-				"type": "nvarchar"
+				"name": "departamento_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "admission_id",
-				"type": "nvarchar"
-			},
-			{
-				"name": "charge_type",
-				"type": "nvarchar"
-			},
-			{
-				"name": "amount",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_status",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_date",
+				"name": "nombre_departamento",
 				"type": "nvarchar"
 			}
 		],

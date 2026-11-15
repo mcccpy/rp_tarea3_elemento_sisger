@@ -12,27 +12,41 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "billing_id",
+				"name": "paciente_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "patient_id_bk",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nombre_completo",
 				"type": "nvarchar"
 			},
 			{
-				"name": "admission_id",
+				"name": "genero",
+				"type": "varchar"
+			},
+			{
+				"name": "fecha_nacimiento",
+				"type": "date"
+			},
+			{
+				"name": "rango_etario",
+				"type": "varchar"
+			},
+			{
+				"name": "correo_electronico",
+				"type": "varchar"
+			},
+			{
+				"name": "direccion",
 				"type": "nvarchar"
 			},
 			{
-				"name": "charge_type",
-				"type": "nvarchar"
-			},
-			{
-				"name": "amount",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_status",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_date",
+				"name": "proveedor_seguro",
 				"type": "nvarchar"
 			}
 		],

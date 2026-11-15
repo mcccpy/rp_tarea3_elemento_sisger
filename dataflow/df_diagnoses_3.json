@@ -35,7 +35,7 @@
 					"name": "derivedColumn3"
 				},
 				{
-					"name": "aggregate1"
+					"name": "flatten1"
 				}
 			],
 			"scriptLines": [
@@ -50,11 +50,23 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive(each(match(type == 'string'), $$ = trim($$))) ~> derivedColumn1",
-				"derivedColumn1 derive(severity = upper(severity)) ~> derivedColumn2",
-				"derivedColumn2 derive() ~> derivedColumn3",
-				"derivedColumn3 aggregate() ~> aggregate1",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"source1 derive(each(match(type=='string'), $$ = trim($$))) ~> derivedColumn1",
+				"derivedColumn1 derive(severity = upper(severity),",
+				"          icd_code = \r",
+				"split(replace(upper(icd_code),'-',','), ',')) ~> derivedColumn2",
+				"derivedColumn2 derive(each(match(name == 'diagnosis_id' || name == 'admission_id'\r",
+				"), $$ = toInteger($$))) ~> derivedColumn3",
+				"derivedColumn3 foldDown(unroll(icd_code),",
+				"     mapColumn(",
+				"          diagnosis_id,",
+				"          admission_id,",
+				"          icd_code,",
+				"          diagnosis_description,",
+				"          severity",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          diagnosis_id as integer,",

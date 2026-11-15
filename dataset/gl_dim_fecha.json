@@ -12,28 +12,63 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "billing_id",
-				"type": "nvarchar"
+				"name": "fecha_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "admission_id",
-				"type": "nvarchar"
+				"name": "fecha_completa",
+				"type": "date"
 			},
 			{
-				"name": "charge_type",
-				"type": "nvarchar"
+				"name": "anio",
+				"type": "smallint",
+				"precision": 5
 			},
 			{
-				"name": "amount",
-				"type": "nvarchar"
+				"name": "trimestre",
+				"type": "tinyint",
+				"precision": 3
 			},
 			{
-				"name": "payment_status",
-				"type": "nvarchar"
+				"name": "trimestre_nombre",
+				"type": "varchar"
 			},
 			{
-				"name": "payment_date",
-				"type": "nvarchar"
+				"name": "mes",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "mes_nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "mes_corto",
+				"type": "char"
+			},
+			{
+				"name": "semana_anio",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "dia_mes",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "dia_semana",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "dia_nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "es_fin_de_semana",
+				"type": "bit"
 			}
 		],
 		"typeProperties": {

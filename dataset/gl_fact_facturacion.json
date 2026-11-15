@@ -12,36 +12,50 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "patient_id",
-				"type": "nvarchar"
+				"name": "facturacion_key",
+				"type": "bigint",
+				"precision": 19
 			},
 			{
-				"name": "full_name",
-				"type": "nvarchar"
+				"name": "billing_id_bk",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "gender",
-				"type": "nvarchar"
+				"name": "admission_id_bk",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "date_of_birth",
-				"type": "nvarchar"
+				"name": "paciente_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "phone",
-				"type": "nvarchar"
+				"name": "departamento_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "email",
-				"type": "nvarchar"
+				"name": "servicio_cargo_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "address",
-				"type": "nvarchar"
+				"name": "fecha_pago_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "insurance_provider",
-				"type": "nvarchar"
+				"name": "monto_facturado",
+				"type": "decimal",
+				"precision": 12,
+				"scale": 2
+			},
+			{
+				"name": "conteo_transacciones",
+				"type": "int",
+				"precision": 10
 			}
 		],
 		"typeProperties": {

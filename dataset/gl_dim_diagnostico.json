@@ -12,28 +12,21 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "billing_id",
+				"name": "diagnostico_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "codigo_icd",
+				"type": "varchar"
+			},
+			{
+				"name": "descripcion_patologia",
 				"type": "nvarchar"
 			},
 			{
-				"name": "admission_id",
-				"type": "nvarchar"
-			},
-			{
-				"name": "charge_type",
-				"type": "nvarchar"
-			},
-			{
-				"name": "amount",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_status",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_date",
-				"type": "nvarchar"
+				"name": "nivel_severidad",
+				"type": "varchar"
 			}
 		],
 		"typeProperties": {

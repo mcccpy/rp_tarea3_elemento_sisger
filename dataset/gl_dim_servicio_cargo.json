@@ -12,28 +12,17 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "billing_id",
-				"type": "nvarchar"
+				"name": "servicio_cargo_key",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "admission_id",
-				"type": "nvarchar"
+				"name": "tipo_cargo",
+				"type": "varchar"
 			},
 			{
-				"name": "charge_type",
-				"type": "nvarchar"
-			},
-			{
-				"name": "amount",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_status",
-				"type": "nvarchar"
-			},
-			{
-				"name": "payment_date",
-				"type": "nvarchar"
+				"name": "estado_pago",
+				"type": "varchar"
 			}
 		],
 		"typeProperties": {
