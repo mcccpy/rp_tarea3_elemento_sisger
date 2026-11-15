@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "sl_billing",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
 				}
 			],
@@ -20,11 +24,32 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"source(output(",
+				"          billing_id as integer,",
+				"          admission_id as integer,",
+				"          paciente_key as integer,",
+				"          departamento_key as integer,",
+				"          servicio_cargo_key as integer,",
+				"          payment_date as date,",
+				"          amount as decimal(12,2)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT a.billing_id,a.admission_id,b.paciente_key,b.departamento_key,c.servicio_cargo_key,a.payment_date,a.amount\\n FROM silver.billing a\\nJOIN gold.fact_admisiones b ON a.admission_id = b.admission_id_bk\\nJOIN gold.dim_servicio_cargo c ON a.charge_type = c.tipo_cargo AND a.payment_status = c.estado_pago\\n',",
+				"     format: 'query') ~> source1",
+				"source1 derive(payment_date = toInteger(\r",
+				"    toString(year(payment_date)) +\r",
+				"    lpad(toString(month(payment_date)),2,'0') +\r",
+				"    lpad(toString(dayOfMonth(payment_date)),2,'0')\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          facturacion_key as long,",
@@ -44,7 +69,16 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          billing_id_bk = billing_id,",
+				"          admission_id_bk = admission_id,",
+				"          paciente_key,",
+				"          departamento_key,",
+				"          servicio_cargo_key,",
+				"          fecha_pago_key = payment_date,",
+				"          monto_facturado = amount",
+				"     )) ~> sink1"
 			]
 		}
 	}

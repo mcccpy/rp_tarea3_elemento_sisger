@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "sl_billing",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
 				}
 			],
@@ -20,11 +24,23 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"source(output(",
+				"          charge_type as string,",
+				"          payment_status as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT charge_type,payment_status FROM silver.billing GROUP BY charge_type,payment_status',",
+				"     format: 'query') ~> source1",
+				"source1 derive(charge_type = iif(isNull(charge_type),'NULL',charge_type)) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          servicio_cargo_key as integer,",
@@ -38,7 +54,11 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          tipo_cargo = charge_type,",
+				"          estado_pago = payment_status",
+				"     )) ~> sink1"
 			]
 		}
 	}

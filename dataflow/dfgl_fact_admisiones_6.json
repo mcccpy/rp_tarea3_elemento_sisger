@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "sl_admissions",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
 				}
 			],
@@ -20,11 +24,41 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"source(output(",
+				"          admission_id as integer,",
+				"          paciente_key as integer,",
+				"          departamento_key as integer,",
+				"          diagnostico_key as integer,",
+				"          fecha_ingreso_key as date,",
+				"          fecha_alta_key as date,",
+				"          attending_doctor_id as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT a.admission_id,paciente_key,departamento_key,diagnostico_key,\\r\\na.admission_date AS fecha_ingreso_key,a.discharge_date AS fecha_alta_key ,a.attending_doctor_id\\r\\nFROM silver.admissions a\\r\\nJOIN gold.dim_paciente b ON a.patient_id = b.patient_id_bk\\r\\nJOIN gold.dim_departamento c ON a.department = c.nombre_departamento\\r\\nJOIN silver.diagnoses d ON a.admission_id = d.admission_id\\r\\nJOIN gold.dim_diagnostico e ON d.icd_code = e.codigo_icd AND d.severity = e.nivel_severidad',",
+				"     format: 'query') ~> source1",
+				"source1 derive(dias_estancia = toInteger(days(fecha_alta_key - fecha_ingreso_key))) ~> derivedColumn1",
+				"derivedColumn1 derive(fecha_ingreso_key = toInteger(\r",
+				"    toString(year(fecha_ingreso_key)) +\r",
+				"    lpad(toString(month(fecha_ingreso_key)),2,'0') +\r",
+				"    lpad(toString(dayOfMonth(fecha_ingreso_key)),2,'0')\r",
+				"),",
+				"          fecha_alta_key = toInteger(\r",
+				"    toString(year(fecha_alta_key)) +\r",
+				"    lpad(toString(month(fecha_alta_key)),2,'0') +\r",
+				"    lpad(toString(dayOfMonth(fecha_alta_key)),2,'0')\r",
+				")) ~> derivedColumn2",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          admision_key as long,",
@@ -45,7 +79,17 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          admission_id_bk = admission_id,",
+				"          paciente_key,",
+				"          departamento_key,",
+				"          diagnostico_key,",
+				"          fecha_ingreso_key,",
+				"          fecha_alta_key,",
+				"          medico_id = attending_doctor_id,",
+				"          dias_estancia",
+				"     )) ~> sink1"
 			]
 		}
 	}
