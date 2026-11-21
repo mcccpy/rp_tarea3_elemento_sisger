@@ -3,7 +3,8 @@
 	"properties": {
 		"trustModeClaimForMi": {
 			"value": "Disabled",
-			"editable": true
+			"editable": true,
+			"isExplicitlySet": false
 		}
 	},
 	"location": "brazilsouth"
